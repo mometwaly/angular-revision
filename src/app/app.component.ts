@@ -7,4 +7,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'anngular-revision';
+  loadedFeature = 'recipe'
+  pickNavigationSelection(feature :string){
+    this.loadedFeature=feature
+
+  }
 }
