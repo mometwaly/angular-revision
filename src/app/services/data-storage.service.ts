@@ -1,3 +1,4 @@
+import { AuthService } from './auth.service';
 import { RecipeService } from './recipe.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -10,7 +11,8 @@ import { map, tap } from 'rxjs/operators';
 export class DataStorageService {
   constructor(
     private http: HttpClient,
-    private recipeServices: RecipeService
+    private recipeServices: RecipeService,
+    private authService: AuthService
   ) {}
   storeRecipes() {
     const recipes = this.recipeServices.getRecipes();
