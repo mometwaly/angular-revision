@@ -3,6 +3,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { throwError, Subject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import * as fromApp from './../store/app.reducer';
+import * as AuthActions from './../modules/auth/store/auth.actions';
 
 export interface AuthResponseData {
   idToken: string;
@@ -16,10 +19,13 @@ export interface AuthResponseData {
   providedIn: 'root',
 })
 export class AuthService {
-  user = new Subject<User>();
+  //user = new Subject<User>();
   token: string;
   private tokenExpriationTimer: any;
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private store: Store<fromApp.AppState>
+  ) {}
   signUp(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
@@ -90,7 +96,15 @@ export class AuthService {
   ) {
     const expiratinDate = new Date(new Date().getTime() + +expireIn * 1000);
     const user = new User(email, id, token, expiratinDate);
-    this.user.next(user);
+    //this.user.next(user);
+    this.store.dispatch(
+      new AuthActions.AuthenticateSuccess({
+        email: email,
+        id: id,
+        token: token,
+        expiratinDate: expiratinDate,
+      })
+    );
     this.autoLogout(expireIn * 1000);
     this.token = token;
     localStorage.setItem('userData', JSON.stringify(user));
@@ -112,8 +126,16 @@ export class AuthService {
       new Date(userdata._tokenExpirationDate)
     );
     if (loadedUser.token) {
-      this.user.next(loadedUser);
+      //this.user.next(loadedUser);
       //we should call auto logout
+      this.store.dispatch(
+        new AuthActions.AuthenticateSuccess({
+          email: loadedUser.email,
+          id: loadedUser.id,
+          token: loadedUser.token,
+          expiratinDate: new Date(userdata._tokenExpirationDate),
+        })
+      );
       this.token = loadedUser.token;
       console.log('log from autoLogin');
     }
@@ -123,7 +145,8 @@ export class AuthService {
       clearTimeout(this.tokenExpriationTimer);
     }
     this.tokenExpriationTimer = null;
-    this.user.next(undefined);
+    //this.user.next(undefined);
+    this.store.dispatch(new AuthActions.Logout());
     this.token = null;
     localStorage.removeItem('userData');
   }
