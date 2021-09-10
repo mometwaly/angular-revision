@@ -15,10 +15,15 @@ export class DataStorageService {
   storeRecipes() {
     const recipes = this.recipeServices.getRecipes();
     this.http
-      .put('https://ng-recipe-book-4c7db.firebaseio.com/recipes.json', recipes)
-      .subscribe((res) => {
-        console.log(res);
-      });
+      .post('https://ng-recipe-book-4c7db.firebaseio.com/recipes.json', recipes)
+      .subscribe(
+        (respose) => {
+          console.log(respose);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
   }
   fetchRecipes() {
     return this.http
